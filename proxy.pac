@@ -1,20 +1,18 @@
 function FindProxyForURL(url, host) {
 
-    // Bypass local / basique
+    // Bypass local
     if (isPlainHostName(host) ||
         host == "localhost" ||
         shExpMatch(host, "127.*")) {
         return "DIRECT";
     }
 
-    // Détection VPN via IP interne accessible uniquement en VPN
-    var vpnTest = dnsResolve("192.168.240.193");
-
-    if (vpnTest == "192.168.240.193") {
+    // Détection VPN via IP du poste (FIABLE)
+    if (isInNet(myIpAddress(), "192.168.230.0", "255.255.255.0")) {
 
         var resolved_ip = dnsResolve(host);
 
-        // Bypass réseaux internes
+        // Bypass réseau interne
         if (resolved_ip &&
             (isInNet(resolved_ip, "10.0.0.0", "255.0.0.0") ||
              isInNet(resolved_ip, "172.16.0.0", "255.240.0.0") ||
@@ -22,10 +20,9 @@ function FindProxyForURL(url, host) {
             return "DIRECT";
         }
 
-        // VPN actif → proxy Lumière
         return "PROXY 192.168.240.2:8080";
     }
 
-    // Hors VPN → direct
+    // Hors VPN → DIRECT
     return "DIRECT";
 }
